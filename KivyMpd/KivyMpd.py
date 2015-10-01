@@ -128,8 +128,6 @@ class KivyMpd(App):
         controls.add_widget(stop)
         controls.add_widget(play)
 
-
-
         trackpos = Slider(size_hint=(None, None), width=400, height=50, pos_hint={'x': 0.15, 'top': 0.12})
 
         hdivider.add_widget(volume)
@@ -137,18 +135,40 @@ class KivyMpd(App):
 
         hdivider.add_widget(controls)
 
+        nowplaying = Label(text="Now Playing: Nothing", size_hint=(None, None), pos_hint={'x': 0.15, 'top': 0.15})
+        nowplaying.bind(texture_size=nowplaying.setter('size'))
+
+        trackelapsed = Label(text="0:00", size_hint=(None, None), pos_hint={'x': 0.64, 'top': 0.08})
+        trackelapsed.bind(texture_size=trackelapsed.setter('size'))
+
+        hdivider.add_widget(nowplaying)
         hdivider.add_widget(trackpos)
-
-
+        hdivider.add_widget(trackelapsed)
 
         def test():
             while self.running:
-                s = client.status()
-                if "songid" in s:
-                    print client.playlistid(s['songid'])
-                time.sleep(2)
+                stat = client.status()
 
-        Timer(10, test).start()
+                if "songid" in stat:
+                    song = client.playlistid(stat['songid'])[0]
+                    duration = int(song['time'])
+                    m, s = divmod(duration, 60)
+                    nowplaying.text = song['artist'] + ' - ' + song["title"] + ' ' + str(m) + ":" + str(s).zfill(2)
+
+                    elapsed = int(round(float(stat['elapsed'])))
+
+                    m, s = divmod(elapsed, 60)
+
+                    trackpos.max = duration
+                    trackpos.value = elapsed
+
+
+                    trackelapsed.text = str(m) + ":" + str(s).zfill(2)
+                else:
+                    nowplaying.text = ""
+                time.sleep(1)
+
+        Timer(1, test).start()
 
         return hdivider
 
