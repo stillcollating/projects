@@ -34,7 +34,7 @@ class KivyMpd(App):
 
         client = MPDClient(use_unicode=True)
 
-        client.connect("192.168.42.1", 6600)
+        client.connect("192.168.1.244", 6600)
 
 
 
@@ -146,11 +146,14 @@ class KivyMpd(App):
         hdivider.add_widget(trackelapsed)
 
         def test():
+            statclient = MPDClient(use_unicode=True)
+            statclient.connect("192.168.1.244", 6600)
+
             while self.running:
-                stat = client.status()
+                stat = statclient.status()
 
                 if "songid" in stat:
-                    song = client.playlistid(stat['songid'])[0]
+                    song = statclient.playlistid(stat['songid'])[0]
                     duration = int(song['time'])
                     m, s = divmod(duration, 60)
                     nowplaying.text = song['artist'] + ' - ' + song["title"] + ' ' + str(m) + ":" + str(s).zfill(2)
