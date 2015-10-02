@@ -134,15 +134,20 @@ class KivyMpd(App):
         def trackpostouchdown(instance,touch):
             if instance.collide_point(*touch.pos):
                 self.trackposistouched = True
-                print "touch down"
 
         def trackpostouchup(instance,touch):
             if self.trackposistouched:
                 client.seekcur(int(math.floor(instance.value)))
                 self.trackposistouched = False
 
+        def trackposvaluechanged(instance,value):
+            m, s = divmod(int(value), 60)
+            trackelapsed.text = str(m) + ":" + str(s).zfill(2)
+
+
         trackpos.bind(on_touch_down=trackpostouchdown)
         trackpos.bind(on_touch_up=trackpostouchup)
+        trackpos.bind(value=trackposvaluechanged)
 
         def test(dt):
             try:
@@ -166,7 +171,6 @@ class KivyMpd(App):
                         m, s = divmod(elapsed, 60)
                         trackpos.max = duration
                         trackpos.value = elapsed
-                        trackelapsed.text = str(m) + ":" + str(s).zfill(2)
                     else:
                         nowplaying.text = ""
             except:
