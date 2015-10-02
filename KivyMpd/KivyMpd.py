@@ -24,7 +24,7 @@ class KivyMpd(App):
 
     running = False
 
-    ip = "192.168.42.1"
+    ip = "192.168.1.244"
 
     def on_start(self):
         self.running = True
