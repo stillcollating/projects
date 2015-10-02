@@ -16,15 +16,18 @@ from kivy.uix.slider import Slider
 from kivy.uix.button import Button
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.floatlayout import FloatLayout
+from kivy.clock import Clock
 
 from threading import Timer
 import time
+import math
 
 class KivyMpd(App):
 
     running = False
 
-    ip = "192.168.1.244"
+    ip = "192.168.56.101"
+    trackposistouched = False
 
     def on_start(self):
         self.running = True
@@ -41,34 +44,8 @@ class KivyMpd(App):
             try:
                 client.connect(self.ip, 6600)
                 connected = True
-            except Exception:
+            except:
                 time.sleep(1)
-
-
-
-      #  for key, value in client.status().items():
-      #  print("%s: %s" % (key, value))
-
-    #    client.command_list_ok_begin()
-
-        #client.update()
-
-        # for i in range(1,10):
-        #     client.send_idle()
-        #     changes = client.fetch_idle()
-        #     print changes
-
-
-        # for key, value in client.status().items():
-        #     print("%s: %s" % (key, value))
-        #
-        # for artist in client.list("artist"):
-        #     for album in client.list("album", "artist", artist):
-        #         for song in client.find("artist", artist, "album", album):
-        #             for k, v in song.iteritems():
-        #                 print k + " " + v
-
-
 
         class Album:
             name = ''
@@ -115,6 +92,7 @@ class KivyMpd(App):
         volume = FloatLayout()
         vol_slider = Slider(orientation='vertical', size_hint=(None, None), width=100, height=400, pos_hint={'top': 0.95}, step=1)
         vol_label = Label(text="0", size_hint=(None, None), pos_hint={'top': 0.2})
+
         def OnSliderValueChange(instance,value):
              vol_label.text = str(int(value))
              client.setvol(int(value))
@@ -153,12 +131,24 @@ class KivyMpd(App):
         hdivider.add_widget(trackpos)
         hdivider.add_widget(trackelapsed)
 
-        def test():
-            try:
-                statclient = MPDClient(use_unicode=True)
-                statclient.connect(self.ip, 6600)
+        def trackpostouchdown(instance,touch):
+            if instance.collide_point(*touch.pos):
+                self.trackposistouched = True
+                print "touch down"
 
-                while self.running:
+        def trackpostouchup(instance,touch):
+            if self.trackposistouched:
+                client.seekcur(int(math.floor(instance.value)))
+                self.trackposistouched = False
+
+        trackpos.bind(on_touch_down=trackpostouchdown)
+        trackpos.bind(on_touch_up=trackpostouchup)
+
+        def test(dt):
+            try:
+                if not self.trackposistouched:
+                    statclient = MPDClient(use_unicode=True)
+                    statclient.connect(self.ip, 6600)
 
                     stat = statclient.status()
 
@@ -172,21 +162,17 @@ class KivyMpd(App):
                         elif "file" in song:
                             nowplaying.text = song['file']
 
-                        elapsed = int(round(float(stat['elapsed'])))
+                        elapsed = int(math.floor(float(stat['elapsed'])))
                         m, s = divmod(elapsed, 60)
                         trackpos.max = duration
                         trackpos.value = elapsed
                         trackelapsed.text = str(m) + ":" + str(s).zfill(2)
                     else:
                         nowplaying.text = ""
-
-                    time.sleep(1)
-
             except:
-                Timer(10, test).start()
+                pass
 
-
-        Timer(1, test).start()
+        Clock.schedule_interval(test, 1)
 
         return hdivider
 
