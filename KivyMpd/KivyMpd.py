@@ -34,7 +34,7 @@ class KivyMpd(App):
 
         client = MPDClient(use_unicode=True)
 
-        client.connect("192.168.56.101", 6600)
+        client.connect("192.168.42.1", 6600)
 
 
 
