@@ -35,8 +35,14 @@ class KivyMpd(App):
     def build(self):
 
         client = MPDClient(use_unicode=True)
+        connected = False
 
-        client.connect(self.ip, 6600)
+        while not connected:
+            try:
+                client.connect(self.ip, 6600)
+                connected = True
+            except Exception:
+                time.sleep(1)
 
 
 
