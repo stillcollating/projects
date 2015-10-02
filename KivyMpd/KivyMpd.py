@@ -24,6 +24,8 @@ class KivyMpd(App):
 
     running = False
 
+    ip = "192.168.1.244"
+
     def on_start(self):
         self.running = True
 
@@ -34,7 +36,7 @@ class KivyMpd(App):
 
         client = MPDClient(use_unicode=True)
 
-        client.connect("192.168.1.244", 6600)
+        client.connect(self.ip, 6600)
 
 
 
@@ -43,7 +45,7 @@ class KivyMpd(App):
 
     #    client.command_list_ok_begin()
 
-        client.update()
+        #client.update()
 
         # for i in range(1,10):
         #     client.send_idle()
@@ -147,7 +149,7 @@ class KivyMpd(App):
 
         def test():
             statclient = MPDClient(use_unicode=True)
-            statclient.connect("192.168.1.244", 6600)
+            statclient.connect(self.ip, 6600)
 
             while self.running:
                 stat = statclient.status()
@@ -156,7 +158,11 @@ class KivyMpd(App):
                     song = statclient.playlistid(stat['songid'])[0]
                     duration = int(song['time'])
                     m, s = divmod(duration, 60)
-                    nowplaying.text = song['artist'] + ' - ' + song["title"] + ' ' + str(m) + ":" + str(s).zfill(2)
+
+                    if "artist" in song and "title" in song:
+                        nowplaying.text = song['artist'] + ' - ' + song["title"] + ' ' + str(m) + ":" + str(s).zfill(2)
+                    elif "file" in song:
+                        nowplaying.text = song['file']
 
                     elapsed = int(round(float(stat['elapsed'])))
 
