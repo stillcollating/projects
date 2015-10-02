@@ -26,7 +26,7 @@ class KivyMpd(App):
 
     running = False
 
-    ip = "192.168.56.101"
+    ip = "192.168.42.1"
     trackposistouched = False
 
     def on_start(self):
