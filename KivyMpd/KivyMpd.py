@@ -154,34 +154,37 @@ class KivyMpd(App):
         hdivider.add_widget(trackelapsed)
 
         def test():
-            statclient = MPDClient(use_unicode=True)
-            statclient.connect(self.ip, 6600)
+            try:
+                statclient = MPDClient(use_unicode=True)
+                statclient.connect(self.ip, 6600)
 
-            while self.running:
-                stat = statclient.status()
+                while self.running:
 
-                if "songid" in stat:
-                    song = statclient.playlistid(stat['songid'])[0]
-                    duration = int(song['time'])
-                    m, s = divmod(duration, 60)
+                    stat = statclient.status()
 
-                    if "artist" in song and "title" in song:
-                        nowplaying.text = song['artist'] + ' - ' + song["title"] + ' ' + str(m) + ":" + str(s).zfill(2)
-                    elif "file" in song:
-                        nowplaying.text = song['file']
+                    if "songid" in stat:
+                        song = statclient.playlistid(stat['songid'])[0]
+                        duration = int(song['time'])
+                        m, s = divmod(duration, 60)
 
-                    elapsed = int(round(float(stat['elapsed'])))
+                        if "artist" in song and "title" in song:
+                            nowplaying.text = song['artist'] + ' - ' + song["title"] + ' ' + str(m) + ":" + str(s).zfill(2)
+                        elif "file" in song:
+                            nowplaying.text = song['file']
 
-                    m, s = divmod(elapsed, 60)
+                        elapsed = int(round(float(stat['elapsed'])))
+                        m, s = divmod(elapsed, 60)
+                        trackpos.max = duration
+                        trackpos.value = elapsed
+                        trackelapsed.text = str(m) + ":" + str(s).zfill(2)
+                    else:
+                        nowplaying.text = ""
 
-                    trackpos.max = duration
-                    trackpos.value = elapsed
+                    time.sleep(1)
 
+            except:
+                Timer(10, test).start()
 
-                    trackelapsed.text = str(m) + ":" + str(s).zfill(2)
-                else:
-                    nowplaying.text = ""
-                time.sleep(1)
 
         Timer(1, test).start()
 
