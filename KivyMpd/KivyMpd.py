@@ -17,18 +17,30 @@ from kivy.uix.button import Button
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.floatlayout import FloatLayout
 from kivy.clock import Clock
+from kivy.uix.widget import  Widget
 
-from threading import Timer
+
 import time
 import math
 import sys
 
+class AlbumGrid(Widget):
+
+
+
 class KivyMpd(App):
 
-    running = False
+    def __init__(self):
+        App.__init__(self)
+        self.ip = "192.168.56.101"
+        self.trackposistouched = False
+        self.running = False
+        self.client = MPDClient(use_unicode=True)
 
-    ip = "192.168.42.1"
-    trackposistouched = False
+    def build_config(self, config):
+        config.setdefaults('main', {
+            'ip': '192.168.56.101'
+        })
 
     def on_start(self):
         self.running = True
@@ -36,17 +48,17 @@ class KivyMpd(App):
     def on_stop(self):
         self.running = False
 
-    def build(self):
-
-        client = MPDClient(use_unicode=True)
+    def connect_client(self):
         connected = False
 
         while not connected:
             try:
-                client.connect(self.ip, 6600)
+                self.client.connect(self.config.get('main', 'ip'), 6600)
                 connected = True
             except:
                 time.sleep(1)
+
+    def build(self):
 
         class Album:
             name = ''
