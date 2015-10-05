@@ -21,6 +21,7 @@ from kivy.clock import Clock
 from threading import Timer
 import time
 import math
+import sys
 
 class KivyMpd(App):
 
@@ -152,13 +153,11 @@ class KivyMpd(App):
         def test(dt):
             try:
                 if not self.trackposistouched:
-                    statclient = MPDClient(use_unicode=True)
-                    statclient.connect(self.ip, 6600)
 
-                    stat = statclient.status()
+                    stat = client.status()
 
                     if "songid" in stat:
-                        song = statclient.playlistid(stat['songid'])[0]
+                        song = client.playlistid(stat['songid'])[0]
                         duration = int(song['time'])
                         m, s = divmod(duration, 60)
 
@@ -167,14 +166,28 @@ class KivyMpd(App):
                         elif "file" in song:
                             nowplaying.text = song['file']
 
-                        elapsed = int(math.floor(float(stat['elapsed'])))
-                        m, s = divmod(elapsed, 60)
                         trackpos.max = duration
-                        trackpos.value = elapsed
+
+                        if "elapsed" in stat:
+                            elapsed = int(math.floor(float(stat['elapsed'])))
+                            m, s = divmod(elapsed, 60)
+                            trackpos.value = elapsed
+                        else:
+                            trackpos.value = 0
+
                     else:
                         nowplaying.text = ""
             except:
-                pass
+                print "Unexpected error:", sys.exc_info()[0]
+                connected = False
+
+                while not connected:
+                    try:
+                        client.connect(self.ip, 6600)
+                        connected = True
+                    except:
+                        print "reconnect"
+                        time.sleep(1)
 
         Clock.schedule_interval(test, 1)
 
