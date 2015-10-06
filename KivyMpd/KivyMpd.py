@@ -24,7 +24,9 @@ import time
 import math
 import sys
 
-class AlbumGrid(Widget):
+class Album()
+    name=""
+    artist=""
 
 
 
@@ -58,44 +60,52 @@ class KivyMpd(App):
             except:
                 time.sleep(1)
 
-    def build(self):
-
-        class Album:
-            name = ''
-            artist = ''
+    def get_albums(self):
 
         albums = []
 
-        for sAlbum in client.list("album"):
-            album = Album()
-            album.name = sAlbum
-            artists = client.list("artist", "album", sAlbum)
-            if len(artists) == 1:
-                album.artist = artists[0]
-            elif len(artists) > 1:
-                album.artist = "VA"
-            elif len(artists) == 0:
-                album.artist = "Unknown"
-            albums.append(album)
+        try:
+            for sAlbum in self.client.list("album"):
+                album = Album()
+                album.name = sAlbum
+                artists = self.client.list("artist", "album", sAlbum)
+                if len(artists) == 1:
+                    album.artist = artists[0]
+                elif len(artists) > 1:
+                    album.artist = "VA"
+                elif len(artists) == 0:
+                    album.artist = "Unknown"
+                albums.append(album)
+
+            albums.sort(key=lambda x: (x.artist, x.name))
+
+            for x in range(100):
+                albums.append(Album())
+        except:
+            pass
+
+        return albums
+
+    def btncallback(self,instance):
+        try:
+            self.client.clear()
+            for x in self.client.find('album', instance.id):
+                self.client.add(x['file'])
+            self.client.play(0)
+        except:
+            pass
 
 
-        albums.sort(key=lambda x: (x.artist, x.name))
+    def build(self):
 
-        for x in range(100):
-            albums.append(Album())
-
-        def btncallback(instance):
-            client.clear()
-            for x in client.find('album', instance.id):
-                client.add(x['file'])
-            client.play(0)
+        self.connect_client()
 
         layout = GridLayout(cols=1, spacing=10, size_hint_y=None)
         # Make sure the height is such that there is something to scroll.
         layout.bind(minimum_height=layout.setter('height'))
         for a in albums:
             btn = Button(text=a.artist + " - " + a.name, id=a.name, size_hint_y=None, height=40)
-            btn.bind(on_press=btncallback)
+            btn.bind(on_press=self.btncallback)
             layout.add_widget(btn)
         root = ScrollView(size_hint=(None, None), size=(400, 400), pos_hint={'x': 0.3, 'top':1})
         root.add_widget(layout)
@@ -204,6 +214,7 @@ class KivyMpd(App):
         Clock.schedule_interval(test, 1)
 
         return hdivider
+
 
 
 if __name__=='__main__':
