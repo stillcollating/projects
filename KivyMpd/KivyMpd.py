@@ -95,6 +95,9 @@ class KivyMpd(App):
         except:
             pass
 
+    def OnSliderValueChange(self,instance,value):
+        vol_label.text = str(int(value))
+        client.setvol(int(value))
 
     def build(self):
 
@@ -103,7 +106,7 @@ class KivyMpd(App):
         layout = GridLayout(cols=1, spacing=10, size_hint_y=None)
         # Make sure the height is such that there is something to scroll.
         layout.bind(minimum_height=layout.setter('height'))
-        for a in albums:
+        for a in self.get_albums():
             btn = Button(text=a.artist + " - " + a.name, id=a.name, size_hint_y=None, height=40)
             btn.bind(on_press=self.btncallback)
             layout.add_widget(btn)
@@ -116,9 +119,7 @@ class KivyMpd(App):
         vol_slider = Slider(orientation='vertical', size_hint=(None, None), width=100, height=400, pos_hint={'top': 0.95}, step=1)
         vol_label = Label(text="0", size_hint=(None, None), pos_hint={'top': 0.2})
 
-        def OnSliderValueChange(instance,value):
-             vol_label.text = str(int(value))
-             client.setvol(int(value))
+
 
         vol_slider.bind(value=OnSliderValueChange)
         vol_slider.value = int(client.status()['volume'])
