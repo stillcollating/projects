@@ -19,25 +19,24 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.clock import Clock
 from kivy.uix.widget import  Widget
 
-
 import time
 import math
 import sys
 
-class Album()
-    name=""
-    artist=""
-
-
+class Album:
+    name = ""
+    artist = ""
 
 class KivyMpd(App):
 
-    def __init__(self):
-        App.__init__(self)
-        self.ip = "192.168.56.101"
-        self.trackposistouched = False
-        self.running = False
-        self.client = MPDClient(use_unicode=True)
+    trackpos_is_touched = False
+    running = False
+    client = MPDClient(use_unicode=True)
+
+    _vol_label = None
+    _track_elapsed = None
+    _trackpos = None
+    _nowplaying = None
 
     def build_config(self, config):
         config.setdefaults('main', {
@@ -52,10 +51,11 @@ class KivyMpd(App):
 
     def connect_client(self):
         connected = False
+        ip = self.config.get('main', 'ip')
 
         while not connected:
             try:
-                self.client.connect(self.config.get('main', 'ip'), 6600)
+                self.client.connect(ip, 6600)
                 connected = True
             except:
                 time.sleep(1)
@@ -86,7 +86,7 @@ class KivyMpd(App):
 
         return albums
 
-    def btncallback(self,instance):
+    def album_btn_press(self, instance):
         try:
             self.client.clear()
             for x in self.client.find('album', instance.id):
@@ -95,9 +95,82 @@ class KivyMpd(App):
         except:
             pass
 
-    def OnSliderValueChange(self,instance,value):
-        vol_label.text = str(int(value))
-        client.setvol(int(value))
+    def vol_slider_change(self, instance, value):
+        try:
+            self.client.setvol(int(value))
+            self._vol_label.text = str(int(value))
+        except:
+            pass
+
+    def trackpos_touch_down(self, instance, touch):
+        if instance.collide_point(*touch.pos):
+           self.trackpos_is_touched = True
+
+    def trackpos_touch_up(self, instance, touch):
+        if self.trackpos_is_touched:
+            try:
+                self.client.seekcur(int(math.floor(instance.value)))
+            except:
+                pass
+            self.trackpos_is_touched = False
+
+    def trackpos_changed(self, instance, value):
+        m, s = divmod(int(value), 60)
+        self._track_elapsed.text = str(m) + ":" + str(s).zfill(2)
+
+    def update_status(self, dt):
+        try:
+            if not self.trackpos_is_touched:
+
+                stat = self.client.status()
+
+                if "songid" in stat:
+                    song = self.client.playlistid(stat['songid'])[0]
+                    duration = int(song['time'])
+                    m, s = divmod(duration, 60)
+
+                    if "artist" in song and "title" in song:
+                        self._nowplaying.text = song['artist'] + ' - ' + song["title"] + ' ' + str(m) + ":" + str(s).zfill(2)
+                    elif "file" in song:
+                        self._nowplaying.text = song['file']
+
+                    self._trackpos.max = duration
+
+                    if "elapsed" in stat:
+                        elapsed = int(math.floor(float(stat['elapsed'])))
+                        m, s = divmod(elapsed, 60)
+                        self._trackpos.value = elapsed
+                    else:
+                        self._trackpos.value = 0
+                else:
+                    self._nowplaying.text = ""
+        except:
+            print sys.exc_info()
+            self.connect_client()
+
+    def back_btn_press(self, instance):
+        try:
+            self.client.previous()
+        except:
+            print sys.exc_info()
+
+    def next_btn_press(self, instance):
+        try:
+            self.client.next()
+        except:
+            print sys.exc_info()
+
+    def pause_btn_press(self, instance):
+        try:
+            self.client.pause(1)
+        except:
+            print sys.exc_info()
+
+    def play_btn_press(self, instance):
+        try:
+            self.client.pause(0)
+        except:
+            print sys.exc_info()
 
     def build(self):
 
@@ -108,7 +181,7 @@ class KivyMpd(App):
         layout.bind(minimum_height=layout.setter('height'))
         for a in self.get_albums():
             btn = Button(text=a.artist + " - " + a.name, id=a.name, size_hint_y=None, height=40)
-            btn.bind(on_press=self.btncallback)
+            btn.bind(on_press=self.album_btn_press)
             layout.add_widget(btn)
         root = ScrollView(size_hint=(None, None), size=(400, 400), pos_hint={'x': 0.3, 'top':1})
         root.add_widget(layout)
@@ -117,102 +190,52 @@ class KivyMpd(App):
 
         volume = FloatLayout()
         vol_slider = Slider(orientation='vertical', size_hint=(None, None), width=100, height=400, pos_hint={'top': 0.95}, step=1)
-        vol_label = Label(text="0", size_hint=(None, None), pos_hint={'top': 0.2})
+        self._vol_label = Label(text="0", size_hint=(None, None), pos_hint={'top': 0.2})
 
-
-
-        vol_slider.bind(value=OnSliderValueChange)
-        vol_slider.value = int(client.status()['volume'])
+        vol_slider.bind(value=self.vol_slider_change)
+        vol_slider.value = int(self.client.status()['volume'])
 
         volume.add_widget(vol_slider)
-        volume.add_widget(vol_label)
+        volume.add_widget(self._vol_label)
 
         back = Button(background_normal="media_skip_backward.png", size_hint=(None,None), height=50, width=50)
         next = Button(background_normal="media_skip_forward.png", size_hint=(None,None), height=50, width=50)
-        stop = Button(background_normal="media_playback_stop.png", size_hint=(None,None), height=50, width=50)
+        pause = Button(background_normal="media_playback_pause.png", size_hint=(None,None), height=50, width=50)
         play = Button(background_normal="media_playback_start.png", size_hint=(None,None), height=50, width=50)
+
+        back.bind(on_press=self.back_btn_press)
+        next.bind(on_press=self.next_btn_press)
+        pause.bind(on_press=self.pause_btn_press)
+        play.bind(on_press=self.play_btn_press)
 
         controls = GridLayout(cols=4,spacing=10, pos_hint={'top': 0.13, 'x': 0.7})
         controls.add_widget(back)
         controls.add_widget(next)
-        controls.add_widget(stop)
+        controls.add_widget(pause)
         controls.add_widget(play)
 
-        trackpos = Slider(size_hint=(None, None), width=400, height=50, pos_hint={'x': 0.15, 'top': 0.12})
+        self._trackpos = Slider(size_hint=(None, None), width=400, height=50, pos_hint={'x': 0.15, 'top': 0.12})
 
         hdivider.add_widget(volume)
         hdivider.add_widget(root)
 
         hdivider.add_widget(controls)
 
-        nowplaying = Label(text="Now Playing: Nothing", size_hint=(None, None), pos_hint={'x': 0.15, 'top': 0.15})
-        nowplaying.bind(texture_size=nowplaying.setter('size'))
+        self._nowplaying = Label(text="Now Playing: Nothing", size_hint=(None, None), pos_hint={'x': 0.15, 'top': 0.15})
+        self._nowplaying.bind(texture_size= self._nowplaying.setter('size'))
 
-        trackelapsed = Label(text="0:00", size_hint=(None, None), pos_hint={'x': 0.64, 'top': 0.08})
-        trackelapsed.bind(texture_size=trackelapsed.setter('size'))
+        self._track_elapsed = Label(text="0:00", size_hint=(None, None), pos_hint={'x': 0.64, 'top': 0.08})
+        self._track_elapsed.bind(texture_size=self._track_elapsed.setter('size'))
 
-        hdivider.add_widget(nowplaying)
-        hdivider.add_widget(trackpos)
-        hdivider.add_widget(trackelapsed)
+        hdivider.add_widget(self._nowplaying)
+        hdivider.add_widget(self._trackpos)
+        hdivider.add_widget(self._track_elapsed)
 
-        def trackpostouchdown(instance,touch):
-            if instance.collide_point(*touch.pos):
-                self.trackposistouched = True
+        self._trackpos.bind(on_touch_down=self.trackpos_touch_down)
+        self._trackpos.bind(on_touch_up=self.trackpos_touch_up)
+        self._trackpos.bind(value=self.trackpos_changed)
 
-        def trackpostouchup(instance,touch):
-            if self.trackposistouched:
-                client.seekcur(int(math.floor(instance.value)))
-                self.trackposistouched = False
-
-        def trackposvaluechanged(instance,value):
-            m, s = divmod(int(value), 60)
-            trackelapsed.text = str(m) + ":" + str(s).zfill(2)
-
-
-        trackpos.bind(on_touch_down=trackpostouchdown)
-        trackpos.bind(on_touch_up=trackpostouchup)
-        trackpos.bind(value=trackposvaluechanged)
-
-        def test(dt):
-            try:
-                if not self.trackposistouched:
-
-                    stat = client.status()
-
-                    if "songid" in stat:
-                        song = client.playlistid(stat['songid'])[0]
-                        duration = int(song['time'])
-                        m, s = divmod(duration, 60)
-
-                        if "artist" in song and "title" in song:
-                            nowplaying.text = song['artist'] + ' - ' + song["title"] + ' ' + str(m) + ":" + str(s).zfill(2)
-                        elif "file" in song:
-                            nowplaying.text = song['file']
-
-                        trackpos.max = duration
-
-                        if "elapsed" in stat:
-                            elapsed = int(math.floor(float(stat['elapsed'])))
-                            m, s = divmod(elapsed, 60)
-                            trackpos.value = elapsed
-                        else:
-                            trackpos.value = 0
-
-                    else:
-                        nowplaying.text = ""
-            except:
-                print "Unexpected error:", sys.exc_info()[0]
-                connected = False
-
-                while not connected:
-                    try:
-                        client.connect(self.ip, 6600)
-                        connected = True
-                    except:
-                        print "reconnect"
-                        time.sleep(1)
-
-        Clock.schedule_interval(test, 1)
+        Clock.schedule_interval(self.update_status, 1)
 
         return hdivider
 
