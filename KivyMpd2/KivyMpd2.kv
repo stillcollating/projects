@@ -51,20 +51,21 @@ BoxLayout:
                 Label:
                     size_hint: 1, .4
                     text_size: self.size
-                    id: "now_playing"
+                    id: now_playing
                     text: "Nothing - Nothing (0:00)"
 
                 BoxLayout:
                     size_hint: 1, .6
 
                     Slider:
-                        id: 'track_pos'
+                        id: track_pos
                         size_hint: .9, 1
 
                     Label:
-                        id: 'duration'
+                        id: track_elapsed
                         size_hint: .1, 1
-                        text: '0:00'
+                        text: app.format_track_elapsed(track_pos.value)
+
 
             BoxLayout:
                 spacing: 15
@@ -72,12 +73,16 @@ BoxLayout:
 
                 ControlButton:
                     background_normal: 'media_skip_backward.png'
+                    on_press: app.back_btn_press(self)
                 ControlButton:
                     background_normal: 'media_skip_forward.png'
+                    on_press: app.next_btn_press(self)
                 ControlButton:
                     background_normal: 'media_playback_pause.png'
+                    on_press: app.pause_btn_press(self)
                 ControlButton:
                     background_normal: 'media_playback_start.png'
+                    on_press: app.play_btn_press(self)
 
 
 
@@ -89,3 +94,4 @@ BoxLayout:
 <ScrollButton>
     size_hint: None, None
     size: 480, 40
+    on_press: app.album_btn_press(self)
