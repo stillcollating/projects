@@ -170,6 +170,7 @@ class KivyMpd2(App):
             container.add_widget(sb)
 
     def build(self):
+
         super(KivyMpd2, self).build()
 
         # self.use_kivy_settings = False
@@ -184,7 +185,7 @@ class KivyMpd2(App):
         except:
             pass
 
-        Clock.schedule_interval(self.update_status, 1)
+        #Clock.schedule_interval(self.update_status, 1)
 
         #self.open_settings()
 
