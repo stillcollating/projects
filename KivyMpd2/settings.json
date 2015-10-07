@@ -1,0 +1,13 @@
+[
+    {
+        "type": "title",
+        "title": "Server"
+    },
+    {
+        "type": "string",
+        "title": "MPD Server IP",
+        "desc": "MPD Server IP",
+        "section": "main",
+        "key": "ip"
+    }
+]

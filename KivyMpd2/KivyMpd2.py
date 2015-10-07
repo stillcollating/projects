@@ -5,12 +5,14 @@ from kivy.config import Config
 Config.set('graphics', 'width', '800')
 Config.set('graphics', 'height', '480')
 Config.set('graphics', 'resizable', '0')
+Config.set('kivy', 'keyboard_mode', 'systemanddock')
 Config.write()
 
 from kivy.app import App
 from kivy.uix.button import Button
 from kivy.clock import Clock
 from mpd import MPDClient
+from kivy.uix.settings import SettingsWithNoMenu
 import time
 import sys
 import math
@@ -159,6 +161,10 @@ class KivyMpd2(App):
 
     def build(self):
         super(KivyMpd2, self).build()
+
+        self.use_kivy_settings = False
+        self.settings_cls = SettingsWithNoMenu
+
         container = self.root.ids.container
 
         self.connect_client()
@@ -178,12 +184,23 @@ class KivyMpd2(App):
 
         Clock.schedule_interval(self.update_status, 1)
 
+        self.open_settings()
+
         return self.root
 
     def build_config(self, config):
         config.setdefaults('main', {
             'ip': '192.168.56.101'
         })
+
+    def build_settings(self, settings):
+        settings.add_json_panel('Settings', self.config, 'settings.json')
+
+    def display_settings(self, settings):
+        if self.root.ids.settings_tab.content is not settings:
+            self.root.ids.settings_tab.add_widget(settings)
+            return True
+        return False
 
 if __name__ == '__main__':
     KivyMpd2().run()
