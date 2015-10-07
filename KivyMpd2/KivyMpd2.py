@@ -40,12 +40,14 @@ class KivyMpd2(App):
         connected = False
         ip = self.config.get('main', 'ip')
 
-        while not connected:
-            try:
-                self.client.connect(ip, 6600)
-                connected = True
-            except:
-                time.sleep(1)
+        #while not connected:
+        try:
+            self.client.connect(ip, 6600)
+            self.refresh_albums_tab()
+
+            connected = True
+        except:
+            pass
 
     def get_albums(self):
 
@@ -158,14 +160,20 @@ class KivyMpd2(App):
                 pass
             self.track_pos_is_touched = False
 
+    def refresh_albums_tab(self):
+        container = self.root.ids.container
+        container.clear_widgets()
+
+        for a in self.get_albums():
+            sb = ScrollButton(text=a.artist + ' - ' + a.name)
+            sb.album = a.name
+            container.add_widget(sb)
 
     def build(self):
         super(KivyMpd2, self).build()
 
         self.use_kivy_settings = False
         self.settings_cls = SettingsWithNoMenu
-
-        container = self.root.ids.container
 
         self.connect_client()
 
@@ -177,10 +185,7 @@ class KivyMpd2(App):
             pass
 
 
-        for a in self.get_albums():
-            sb = ScrollButton(text=a.artist + ' - ' + a.name)
-            sb.album = a.name
-            container.add_widget(sb)
+
 
         Clock.schedule_interval(self.update_status, 1)
 
