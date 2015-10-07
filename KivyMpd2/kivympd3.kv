@@ -1,0 +1,104 @@
+#:kivy 1.9.0
+
+
+BoxLayout:
+    BoxLayout:
+        orientation: 'vertical'
+        size_hint: .15, 1
+
+        Slider:
+            orientation: 'vertical'
+            size_hint: 1, .8
+            min: 0
+            max: 100
+            step: 1
+            id: vol_slider
+        Label:
+            text: str(int(vol_slider.value))
+            size_hint: 1, .2
+
+    BoxLayout:
+        orientation: 'vertical'
+
+        TabbedPanel:
+            do_default_tab: False
+
+            TabbedPanelItem:
+                text: 'Albums'
+
+                FloatLayout:
+                    ScrollView:
+                        size_hint: None, None
+                        size: 500, 320
+                        pos_hint: {'center_x': .5, 'center_y': .5}
+
+                        GridLayout:
+                            cols: 1
+                            padding: 10
+                            spacing: 10
+                            height: self.minimum_height
+                            size_hint: None, None
+                            do_scroll_x: False
+                            id: container
+
+            TabbedPanelItem:
+                text: 'Settings'
+                id: settings_tab
+
+        BoxLayout:
+            size_hint: 1, .2
+            spacing: 50
+
+            BoxLayout:
+                size_hint: .6, 1
+                orientation: 'vertical'
+
+                Label:
+                    size_hint: 1, .4
+                    text_size: self.size
+                    id: now_playing
+                    text: "Nothing - Nothing (0:00)"
+
+                BoxLayout:
+                    size_hint: 1, .6
+
+                    Slider:
+                        id: track_pos
+                        size_hint: .9, 1
+                        on_touch_down: app.track_pos_touch_down(*args)
+                        on_touch_up: app.track_pos_touch_up(*args)
+
+                    Label:
+                        id: track_elapsed
+                        size_hint: .1, 1
+                        text: app.format_track_elapsed(track_pos.value)
+
+
+            BoxLayout:
+                spacing: 15
+                size_hint: .4, 1
+
+                ControlButton:
+                    background_normal: 'media_skip_backward.png'
+                    on_press: app.back_btn_press(self)
+                ControlButton:
+                    background_normal: 'media_skip_forward.png'
+                    on_press: app.next_btn_press(self)
+                ControlButton:
+                    background_normal: 'media_playback_pause.png'
+                    on_press: app.pause_btn_press(self)
+                ControlButton:
+                    background_normal: 'media_playback_start.png'
+                    on_press: app.play_btn_press(self)
+
+
+
+<ControlButton>
+    size_hint: None,None
+    size: 50, 50
+    pos_hint: {'center_y': .5}
+
+<ScrollButton>
+    size_hint: None, None
+    size: 480, 40
+    on_press: app.album_btn_press(self)
