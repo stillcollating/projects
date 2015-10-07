@@ -185,7 +185,7 @@ class KivyMpd2(App):
         except:
             pass
 
-        #Clock.schedule_interval(self.update_status, 1)
+        Clock.schedule_interval(self.update_status, 1)
 
         #self.open_settings()
 
