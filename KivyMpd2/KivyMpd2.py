@@ -32,7 +32,7 @@ class Album:
 class KivyMpd2(App):
 
     client = MPDClient(use_unicode=True)
-    trackpos_is_touched = False
+    track_pos_is_touched = False
 
     def connect_client(self):
         connected = False
@@ -83,8 +83,7 @@ class KivyMpd2(App):
 
     def update_status(self, dt):
         try:
-            if not self.trackpos_is_touched:
-
+            if not self.track_pos_is_touched:
                 stat = self.client.status()
 
                 if "songid" in stat:
@@ -101,7 +100,6 @@ class KivyMpd2(App):
 
                     if "elapsed" in stat:
                         elapsed = int(math.floor(float(stat['elapsed'])))
-                        # m, s = divmod(elapsed, 60)
                         self.root.ids.track_pos.value = elapsed
                     else:
                         self.root.ids.track_pos.value = 0
@@ -146,6 +144,18 @@ class KivyMpd2(App):
         m, s = divmod(int(value), 60)
         return str(m) + ":" + str(s).zfill(2)
 
+    def track_pos_touch_down(self, instance, touch):
+        if instance.collide_point(*touch.pos):
+           self.track_pos_is_touched = True
+
+    def track_pos_touch_up(self, instance, touch):
+        if self.track_pos_is_touched:
+            try:
+                self.client.seekcur(int(math.floor(instance.value)))
+            except:
+                pass
+            self.track_pos_is_touched = False
+
 
     def build(self):
         super(KivyMpd2, self).build()
@@ -156,6 +166,7 @@ class KivyMpd2(App):
         try:
             stat = self.client.status()
             self.root.ids.vol_slider.value = int(stat['volume'])
+            self.root.ids.vol_slider.bind(value=self.vol_slider_change)
         except:
             pass
 

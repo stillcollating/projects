@@ -60,6 +60,8 @@ BoxLayout:
                     Slider:
                         id: track_pos
                         size_hint: .9, 1
+                        on_touch_down: app.track_pos_touch_down(*args)
+                        on_touch_up: app.track_pos_touch_up(*args)
 
                     Label:
                         id: track_elapsed
