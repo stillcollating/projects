@@ -16,6 +16,7 @@ from kivy.uix.settings import SettingsWithNoMenu
 import time
 import sys
 import math
+import os
 
 
 class ScrollButton(Button):
@@ -172,7 +173,6 @@ class KivyMpd2(App):
             container.add_widget(sb)
 
     def build(self):
-
         super(KivyMpd2, self).build()
 
         self.use_kivy_settings = False
@@ -192,7 +192,8 @@ class KivyMpd2(App):
         })
 
     def build_settings(self, settings):
-        settings.add_json_panel('Settings', self.config, 'settings.json')
+        py_dir = os.path.dirname(os.path.realpath(__file__)) + os.path.sep
+        settings.add_json_panel('Settings', self.config, py_dir + 'settings.json')
 
     def display_settings(self, settings):
         if self.root.ids.settings_tab.content is not settings:
