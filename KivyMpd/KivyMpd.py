@@ -38,6 +38,8 @@ class KivyMpd(App):
     _trackpos = None
     _nowplaying = None
 
+    p = None
+
     def build_config(self, config):
         config.setdefaults('main', {
             'ip': '192.168.56.101'
