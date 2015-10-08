@@ -175,16 +175,14 @@ class KivyMpd2(App):
 
         super(KivyMpd2, self).build()
 
-        # self.use_kivy_settings = False
-        # self.settings_cls = SettingsWithNoMenu
-
-
+        self.use_kivy_settings = False
+        self.settings_cls = SettingsWithNoMenu
 
         self.connect_client()
 
         Clock.schedule_interval(self.update_status, 1)
 
-        #self.open_settings()
+        self.open_settings()
 
         return self.root
 
@@ -193,14 +191,14 @@ class KivyMpd2(App):
             'ip': '192.168.56.101'
         })
 
-#    def build_settings(self, settings):
- #       settings.add_json_panel('Settings', self.config, 'settings.json')
+    def build_settings(self, settings):
+        settings.add_json_panel('Settings', self.config, 'settings.json')
 
-    # def display_settings(self, settings):
-    #     if self.root.ids.settings_tab.content is not settings:
-    #         self.root.ids.settings_tab.add_widget(settings)
-    #         return True
-    #     return False
+    def display_settings(self, settings):
+        if self.root.ids.settings_tab.content is not settings:
+            self.root.ids.settings_tab.add_widget(settings)
+            return True
+        return False
 
 if __name__ == '__main__':
     KivyMpd2().run()
