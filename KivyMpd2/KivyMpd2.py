@@ -43,8 +43,10 @@ class KivyMpd2(App):
         #while not connected:
         try:
             self.client.connect(ip, 6600)
+            stat = self.client.status()
+            self.root.ids.vol_slider.value = int(stat['volume'])
+            self.root.ids.vol_slider.bind(value=self.vol_slider_change)
             self.refresh_albums_tab()
-
             connected = True
         except:
             pass
@@ -176,14 +178,9 @@ class KivyMpd2(App):
         # self.use_kivy_settings = False
         # self.settings_cls = SettingsWithNoMenu
 
-        self.connect_client()
 
-        try:
-            stat = self.client.status()
-            self.root.ids.vol_slider.value = int(stat['volume'])
-            self.root.ids.vol_slider.bind(value=self.vol_slider_change)
-        except:
-            pass
+
+        self.connect_client()
 
         Clock.schedule_interval(self.update_status, 1)
 
