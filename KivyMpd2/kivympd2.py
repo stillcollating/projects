@@ -191,6 +191,7 @@ class KivyMpd2(App):
         while True:
             print self.p_gui_recv.recv()
             self.p_gui_send.send('I hear you')
+            print __name__
 
     def build(self):
         super(KivyMpd2, self).build()

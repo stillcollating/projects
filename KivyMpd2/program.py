@@ -4,11 +4,12 @@ from multiprocessing import Pipe
 import time
 
 
-#if __name__ != '__main__':
-
+if __name__ != '__main__':
+    from mpd import MPDClient
 
 def ix(p_mpd_send, p_mpd_recv):
     running = True
+    client = MPDClient()
 
     while running:
         time.sleep(10)
