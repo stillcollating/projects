@@ -37,7 +37,8 @@ class KivyMpd2(App):
     connected = False
     update_status_clock = None
 
-    p = None
+    p_gui_recv = None
+    p_gui_send = None
 
     def test_trigger(self, dt):
         print 'test'
@@ -188,7 +189,9 @@ class KivyMpd2(App):
 
     def tix(self):
         while True:
-            print self.p.recv()
+            print self.p_gui_recv.recv()
+            self.p_gui_send.send('I hear you')
+            print __name__
 
     def build(self):
         super(KivyMpd2, self).build()
