@@ -1,0 +1,59 @@
+# depslib dependency file v1.0
+1444662925 source:/home/brownj/projects/test2/03_event_driven_programming/03_event_driven_programming.cpp
+	<SDL2/SDL.h>
+	<stdio.h>
+
+1444663273 source:/home/brownj/projects/test2/04_key_presses/04_key_presses.cpp
+	<SDL2/SDL.h>
+	<stdio.h>
+	<string>
+
+1444663713 source:/home/brownj/projects/test2/05_optimized_surface_loading_and_soft_stretching/05_optimized_surface_loading_and_soft_stretching.cpp
+	<SDL2/SDL.h>
+	<stdio.h>
+	<string>
+
+1444664356 source:/home/brownj/projects/test2/06_extension_libraries_and_loading_other_image_formats/06_extension_libraries_and_loading_other_image_formats.cpp
+	<SDL2/SDL.h>
+	<SDL2/SDL_image.h>
+	<stdio.h>
+	<string>
+
+1444668587 source:/home/brownj/projects/test2/07_texture_loading_and_rendering/07_texture_loading_and_rendering.cpp
+	<SDL2/SDL.h>
+	<SDL2/SDL_image.h>
+	<stdio.h>
+	<string>
+
+1444671434 source:/home/brownj/projects/test2/08_geometry_rendering/08_geometry_rendering.cpp
+	<SDL2/SDL.h>
+	<SDL2/SDL_image.h>
+	<stdio.h>
+	<string>
+	<cmath>
+
+1444672566 source:/home/brownj/projects/test2/09_the_viewport/09_the_viewport.cpp
+	<SDL2/SDL.h>
+	<SDL2/SDL_image.h>
+	<stdio.h>
+	<string>
+
+1444673813 source:/home/brownj/projects/test2/10_color_keying/10_color_keying.cpp
+	<SDL2/SDL.h>
+	<SDL2/SDL_image.h>
+	<stdio.h>
+	<string>
+
+1444674647 source:/home/brownj/projects/test2/13_alpha_blending/13_alpha_blending.cpp
+	<SDL2/SDL.h>
+	<SDL2/SDL_image.h>
+	<stdio.h>
+	<string>
+
+1444675865 source:/home/brownj/projects/test2/54_touches/54_touches.cpp
+	<SDL2/SDL.h>
+	<SDL2/SDL_image.h>
+	<stdio.h>
+	<string>
+	<string.h>
+
